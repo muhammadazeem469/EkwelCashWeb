@@ -15,9 +15,9 @@ const mintValidationSchema = Yup.object({
 });
 
 export const MintForm: FC = () => {
-  const { formData, setCurrentStep, resetProgress } = useFormProgressStore();
+  const { formData, setCurrentStep } = useFormProgressStore();
 
-  const pollMintStatus = async (mintId: string) => {
+  /* const pollMintStatus = async (mintId: string) => {
     let attempts = 0;
     const maxAttempts = 12;
 
@@ -49,7 +49,7 @@ export const MintForm: FC = () => {
     };
 
     checkStatus();
-  };
+  }; */
 
   return (
     <Formik

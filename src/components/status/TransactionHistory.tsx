@@ -2,6 +2,7 @@ import { FC } from "react";
 import { useTransactionStore } from "../../hooks/useTransaction";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { motion } from "framer-motion";
 
 dayjs.extend(relativeTime);
 
@@ -37,7 +38,7 @@ export const TransactionHistory: FC = () => {
               </div>
               <div
                 className={`px-2 py-1 rounded text-sm ${
-                  transaction.status === "SUCCESS"
+                  transaction.status === "SUCCEEDED"
                     ? "bg-green-100 text-green-800"
                     : transaction.status === "FAILED"
                     ? "bg-red-100 text-red-800"
