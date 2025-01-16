@@ -144,9 +144,16 @@ import axios from "axios";
 import { useAuthStore } from "../store/useAuthStore";
 import { ContractDeployment, TokenResponse } from "../types/api.types";
 
-const BASE_URL = {
+const isProd = import.meta.env.PROD;
+const CORS_PROXY = isProd ? "https://cors-anywhere.herokuapp.com/" : "";
+
+/* const BASE_URL = {
   AUTH: import.meta.env.VITE_AUTH_BASE_URL,
   API: import.meta.env.VITE_API_BASE_URL,
+}; */
+const BASE_URL = {
+  AUTH: `${CORS_PROXY}${import.meta.env.VITE_AUTH_BASE_URL}`,
+  API: `${CORS_PROXY}${import.meta.env.VITE_API_BASE_URL}`,
 };
 
 const api = axios.create({
