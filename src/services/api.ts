@@ -163,22 +163,6 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use(async (config) => {
-  if (import.meta.env.PROD && config.method !== "GET") {
-    try {
-      await axios.options(config.url!, {
-        headers: {
-          "Access-Control-Request-Method": config.method!.toUpperCase(),
-          "Access-Control-Request-Headers": "content-type,authorization",
-        },
-      });
-    } catch (error) {
-      console.warn("Preflight check failed:", error);
-    }
-  }
-  return config;
-});
-
 api.interceptors.request.use(
   async (config) => {
     const authStore = useAuthStore.getState();
@@ -202,23 +186,6 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-const getHeaders = (isProd: boolean) => {
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    Accept: "application/json",
-  };
-
-  if (isProd) {
-    return {
-      ...headers,
-      Origin: "https://ekwelcashweb.onrender.com",
-      "Access-Control-Allow-Origin": "*",
-    };
-  }
-
-  return headers;
-};
 
 export const refreshToken = async () => {
   const { clientId, clientSecret } = useAuthStore.getState();
@@ -245,7 +212,13 @@ export const apiService = {
         `${BASE_URL.AUTH}/realms/Arkane/protocol/openid-connect/token`,
         formData,
         {
-          headers: getHeaders(import.meta.env.PROD),
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          },
         }
       );
       return response.data;
