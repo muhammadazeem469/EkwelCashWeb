@@ -5,6 +5,7 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
+    port: 5173,
     proxy: {
       "/auth": {
         target: "https://login-sandbox.venly.io",

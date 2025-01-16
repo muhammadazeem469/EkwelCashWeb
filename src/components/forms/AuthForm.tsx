@@ -17,8 +17,8 @@ export const AuthForm: FC = () => {
   return (
     <Formik
       initialValues={{
-        clientId: "",
-        clientSecret: "",
+        clientId: "89baebfa-f664-4c89-bd1b-98abd2e9d73d",
+        clientSecret: "jgdlq9LzkRwcvFF3DAxGiREaX93rWXg2",
       }}
       validationSchema={authValidationSchema}
       onSubmit={async (values, { setSubmitting }) => {
