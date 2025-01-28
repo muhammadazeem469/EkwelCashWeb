@@ -7,8 +7,8 @@ import { apiService } from "../../services/api";
 import { toast } from "react-toastify";
 
 const authValidationSchema = Yup.object({
-  clientId: Yup.string().required("Client ID is required"),
-  clientSecret: Yup.string().required("Client Secret is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string().required("Password is required"),
 });
 
 export const AuthForm: FC = () => {
@@ -17,26 +17,37 @@ export const AuthForm: FC = () => {
   return (
     <Formik
       initialValues={{
-        clientId: "89baebfa-f664-4c89-bd1b-98abd2e9d73d",
-        clientSecret: "jgdlq9LzkRwcvFF3DAxGiREaX93rWXg2",
+        email: "mash@example.com",
+        password: "password123",
       }}
       validationSchema={authValidationSchema}
-      onSubmit={async (values, { setSubmitting }) => {
+      onSubmit={async (values, { setSubmitting, setFieldError }) => {
         try {
-          // First store the credentials
-          setCredentials(values.clientId, values.clientSecret);
+          console.log("Submitting auth form with values:", values);
+          setCredentials(values.email, values.password);
 
-          const formData = new URLSearchParams();
-          formData.append("grant_type", "client_credentials");
-          formData.append("client_id", values.clientId);
-          formData.append("client_secret", values.clientSecret);
+          const response = await apiService.authenticate(values);
+          console.log("Auth response:", response);
 
-          const response = await apiService.authenticate(formData);
-          setToken(response.access_token, response.expires_in);
-          toast.success("Authentication successful!");
+          if (response && response.access_token) {
+            setToken(response.access_token, 3600);
+            toast.success("Authentication successful!");
+          } else {
+            throw new Error("Invalid response format");
+          }
         } catch (error) {
-          console.error("Authentication failed:", error);
-          toast.error("Authentication failed. Please check your credentials.");
+          console.error("Authentication error:", error);
+
+          if (error instanceof Error) {
+            toast.error(error.message || "Authentication failed");
+          } else {
+            toast.error(
+              "Authentication failed. Please check your credentials."
+            );
+          }
+
+          // Reset form submission state
+          setFieldError("email", "Authentication failed");
         } finally {
           setSubmitting(false);
         }
@@ -45,33 +56,38 @@ export const AuthForm: FC = () => {
       {({ isSubmitting, errors, touched, getFieldProps }) => (
         <Form className="space-y-4">
           <div>
-            <label className="block text-[#30374f] mb-1">Client ID</label>
+            <label className="block text-[#30374f] mb-1">Email</label>
             <input
-              type="text"
-              {...getFieldProps("clientId")}
+              type="email"
+              {...getFieldProps("email")}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8438fd]"
+              disabled={isSubmitting}
             />
-            {errors.clientId && touched.clientId && (
-              <div className="text-red-500 text-sm mt-1">{errors.clientId}</div>
+            {errors.email && touched.email && (
+              <div className="text-red-500 text-sm mt-1">{errors.email}</div>
             )}
           </div>
 
           <div>
-            <label className="block text-[#30374f] mb-1">Client Secret</label>
+            <label className="block text-[#30374f] mb-1">Password</label>
             <input
               type="password"
-              {...getFieldProps("clientSecret")}
+              {...getFieldProps("password")}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8438fd]"
+              disabled={isSubmitting}
             />
-            {errors.clientSecret && touched.clientSecret && (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.clientSecret}
-              </div>
+            {errors.password && touched.password && (
+              <div className="text-red-500 text-sm mt-1">{errors.password}</div>
             )}
           </div>
 
-          <Button type="submit" isLoading={isSubmitting} className="w-full">
-            Authenticate
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            {isSubmitting ? "Authenticating..." : "Authenticate"}
           </Button>
         </Form>
       )}

@@ -4,10 +4,10 @@ import { persist } from "zustand/middleware";
 interface AuthState {
   token: string | null;
   expiresAt: number | null;
-  clientId: string | null;
-  clientSecret: string | null;
+  email: string | null;
+  password: string | null;
   setToken: (token: string, expiresIn: number) => void;
-  setCredentials: (clientId: string, clientSecret: string) => void;
+  setCredentials: (email: string, password: string) => void;
   clearToken: () => void;
   isAuthenticated: () => boolean;
 }
@@ -17,21 +17,21 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       token: null,
       expiresAt: null,
-      clientId: null,
-      clientSecret: null,
+      email: null,
+      password: null,
       setToken: (token, expiresIn) => {
         const expiresAt = Date.now() + expiresIn * 1000;
         set({ token, expiresAt });
       },
-      setCredentials: (clientId, clientSecret) => {
-        set({ clientId, clientSecret });
+      setCredentials: (email, password) => {
+        set({ email, password });
       },
       clearToken: () =>
         set({
           token: null,
           expiresAt: null,
-          clientId: null,
-          clientSecret: null,
+          email: null,
+          password: null,
         }),
       isAuthenticated: () => {
         const state = get();

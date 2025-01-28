@@ -4,10 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vite --mode development",
+    "build": "tsc && vite build --mode production",
+    "preview": "vite preview --mode production"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",

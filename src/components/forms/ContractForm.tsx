@@ -94,10 +94,9 @@ export const ContractForm: FC = () => {
   return (
     <Formik
       initialValues={{
-        name: "My Second Polygon Venly NFT Collection",
-        description: "First Polygon collection contains Venly NFTs",
-        image:
-          "https://storage-staging.venly.io/applications/bff93371-db40-4363-9692-4fbe64a34b54/logovenly.png",
+        name: "Ekwel Cash",
+        description: "USD",
+        image: "https://i.ibb.co/f0ZWgzZ/100usdbill.jpg",
         chain: "MATIC",
         externalUrl: "https://www.venly.io/",
       }}

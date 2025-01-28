@@ -66,9 +66,11 @@ export const TokenTypeForm: FC = () => {
   return (
     <Formik
       initialValues={{
-        name: "First Polygon collection contains Venly NFTs",
-        description: "My Second Polygon Venly NFT Collection",
-        image: formData.contractDeployment?.image || "",
+        name: "Ekwel Cash",
+        description: "USD",
+        image:
+          formData.contractDeployment?.image ||
+          "https://i.ibb.co/f0ZWgzZ/100usdbill.jpg",
       }}
       validationSchema={tokenTypeValidationSchema}
       onSubmit={async (values, { setSubmitting }) => {
