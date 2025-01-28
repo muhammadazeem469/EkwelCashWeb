@@ -23,11 +23,9 @@ export const AuthForm: FC = () => {
       validationSchema={authValidationSchema}
       onSubmit={async (values, { setSubmitting, setFieldError }) => {
         try {
-          console.log("Submitting auth form with values:", values);
           setCredentials(values.email, values.password);
 
           const response = await apiService.authenticate(values);
-          console.log("Auth response:", response);
 
           if (response && response.access_token) {
             setToken(response.access_token, 3600);

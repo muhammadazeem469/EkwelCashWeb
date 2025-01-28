@@ -37,7 +37,6 @@ export const ContractForm: FC = () => {
         const statusResponse = await apiService.getContractDeployment(
           deploymentId
         );
-        console.log("Status check response:", statusResponse);
 
         if (statusResponse.result.status === "SUCCEEDED") {
           // Changed from SUCCESS to SUCCEEDED
@@ -103,10 +102,8 @@ export const ContractForm: FC = () => {
       validationSchema={contractValidationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         try {
-          console.log("Starting contract deployment...");
           // First API call to get deployment ID
           const deployResponse = await apiService.deployContract(values);
-          console.log("Deployment response:", deployResponse);
 
           const deploymentId = deployResponse.result.id;
 

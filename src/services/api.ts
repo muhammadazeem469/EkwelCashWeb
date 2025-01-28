@@ -16,7 +16,6 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const authStore = useAuthStore.getState();
-    console.log("Making API request to:", config.url);
 
     if (authStore.token) {
       config.headers.Authorization = `Bearer ${authStore.token}`;
@@ -92,12 +91,11 @@ export const apiService = {
   // Contract operations
   deployContract: async (contractData: ContractDeployment) => {
     try {
-      console.log("Deploying contract with data:", contractData);
       const response = await api.post(
         "/venly/contracts/deployments",
         contractData
       );
-      console.log("Contract deployment response:", response.data);
+
       return response.data;
     } catch (error) {
       console.error("Contract deployment error:", error);
