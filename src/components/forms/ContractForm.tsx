@@ -39,19 +39,24 @@ export const ContractForm: FC = () => {
         );
 
         if (statusResponse.result.status === "SUCCEEDED") {
-          // Changed from SUCCESS to SUCCEEDED
+          // Store complete contract data with all image fields
+          const contractData = {
+            ...statusResponse.result,
+            address: statusResponse.result.address,
+            image: statusResponse.result.image,
+            imageUrl: statusResponse.result.image,
+            image_url: statusResponse.result.image,
+          };
+
           setFormData({
-            contractDeployment: {
-              ...statusResponse.result,
-              address: statusResponse.result.address,
-            },
+            contractDeployment: contractData,
           });
 
           addTransaction({
             id: deploymentId,
             type: "CONTRACT_DEPLOYMENT",
             status: "SUCCEEDED",
-            data: statusResponse.result,
+            data: contractData,
           });
 
           setCurrentStep(2);
@@ -59,9 +64,14 @@ export const ContractForm: FC = () => {
           setProcessing(false);
           return;
         } else if (statusResponse.result.status === "FAILED") {
+          addTransaction({
+            id: deploymentId,
+            type: "CONTRACT_DEPLOYMENT",
+            status: "FAILED",
+            data: statusResponse.result,
+          });
           toast.error("Contract deployment failed");
           setProcessing(false);
-
           return;
         }
 
@@ -97,28 +107,34 @@ export const ContractForm: FC = () => {
         description: "USD",
         image: "https://i.ibb.co/f0ZWgzZ/100usdbill.jpg",
         chain: "MATIC",
-        externalUrl: "https://www.venly.io/",
+        externalUrl: "https://www.ekwelcash.io/",
       }}
       validationSchema={contractValidationSchema}
       onSubmit={async (values, { setSubmitting }) => {
         try {
-          // First API call to get deployment ID
           const deployResponse = await apiService.deployContract(values);
 
           const deploymentId = deployResponse.result.id;
 
+          // Store initial contract data with all image fields
+          const contractData = {
+            ...deployResponse.result,
+            image: values.image,
+            imageUrl: values.image,
+            image_url: values.image,
+          };
+
           setFormData({
-            contractDeployment: deployResponse.result,
+            contractDeployment: contractData,
           });
 
           addTransaction({
             id: deploymentId,
             type: "CONTRACT_DEPLOYMENT",
             status: "PENDING",
-            data: deployResponse.result,
+            data: contractData,
           });
 
-          // Start checking status using deploymentId
           checkDeploymentStatus(deploymentId);
           toast.info("Contract deployment initiated. Please wait...");
         } catch (error) {

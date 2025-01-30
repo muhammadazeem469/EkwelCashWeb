@@ -30,16 +30,47 @@ export const TokenTypeForm: FC = () => {
         );
 
         if (statusResponse.result.status === "SUCCEEDED") {
+          // Store complete metadata including all image fields
           setFormData({
             ...formData,
-            tokenType: statusResponse.result,
+            tokenType: {
+              ...statusResponse.result,
+              metadata: {
+                ...statusResponse.result.metadata,
+                image: statusResponse.result.metadata.image,
+                imagePreview: statusResponse.result.metadata.image,
+                imageThumbnail: statusResponse.result.metadata.image,
+                contract: {
+                  ...statusResponse.result.metadata.contract,
+                  image: statusResponse.result.metadata.image,
+                  imageUrl: statusResponse.result.metadata.image,
+                  image_url: statusResponse.result.metadata.image,
+                },
+              },
+            },
           });
+
           addTransaction({
             id: creationId,
             type: "TOKEN_CREATION",
             status: "SUCCEEDED",
-            data: statusResponse.result,
+            data: {
+              ...statusResponse.result,
+              metadata: {
+                ...statusResponse.result.metadata,
+                image: statusResponse.result.metadata.image,
+                imagePreview: statusResponse.result.metadata.image,
+                imageThumbnail: statusResponse.result.metadata.image,
+                contract: {
+                  ...statusResponse.result.metadata.contract,
+                  image: statusResponse.result.metadata.image,
+                  imageUrl: statusResponse.result.metadata.image,
+                  image_url: statusResponse.result.metadata.image,
+                },
+              },
+            },
           });
+
           setCurrentStep(3);
           toast.success("Token type created successfully!");
           return;
@@ -86,26 +117,61 @@ export const TokenTypeForm: FC = () => {
           const response = await apiService.createTokenType({
             chain: formData.contractDeployment.chain,
             contractAddress: formData.contractDeployment.address,
-            creations: [values],
+            creations: [
+              {
+                name: values.name,
+                description: values.description,
+                image: values.image,
+              },
+            ],
           });
 
-          // Store initial token type data
+          // Store token type data with complete image fields
           setFormData({
-            tokenType: response.result.creations[0],
+            ...formData,
+            tokenType: {
+              ...response.result.creations[0],
+              metadata: {
+                ...response.result.creations[0].metadata,
+                image: values.image,
+                imagePreview: values.image,
+                imageThumbnail: values.image,
+                contract: {
+                  ...response.result.creations[0].metadata.contract,
+                  image: values.image,
+                  imageUrl: values.image,
+                  image_url: values.image,
+                },
+              },
+            },
           });
 
           addTransaction({
             id: response.result.creations[0].id,
             type: "TOKEN_CREATION",
             status: "PENDING",
-            data: response.result.creations[0],
+            data: {
+              ...response.result.creations[0],
+              metadata: {
+                ...response.result.creations[0].metadata,
+                image: values.image,
+                imagePreview: values.image,
+                imageThumbnail: values.image,
+                contract: {
+                  ...response.result.creations[0].metadata.contract,
+                  image: values.image,
+                  imageUrl: values.image,
+                  image_url: values.image,
+                },
+              },
+            },
           });
 
           pollTokenTypeStatus(response.result.creations[0].id);
           toast.info("Token type creation initiated. Please wait...");
         } catch (error) {
-          toast.error("Failed to create token type");
           console.error("Token type creation failed:", error);
+          toast.error("Failed to create token type");
         } finally {
           setSubmitting(false);
         }

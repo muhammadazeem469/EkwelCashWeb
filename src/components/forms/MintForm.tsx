@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { useFormProgressStore } from "../../store/useFormProgressStore";
 import { apiService } from "../../services/api";
 import { Button } from "../ui/Button";
+import { useTransactionStore } from "../../hooks/useTransaction";
 import { toast } from "react-toastify";
 
 const mintValidationSchema = Yup.object({
@@ -15,9 +16,10 @@ const mintValidationSchema = Yup.object({
 });
 
 export const MintForm: FC = () => {
-  const { formData, setCurrentStep } = useFormProgressStore();
+  const { formData, setCurrentStep, resetProgress } = useFormProgressStore();
+  const addTransaction = useTransactionStore((state) => state.addTransaction);
 
-  /* const pollMintStatus = async (mintId: string) => {
+  const pollMintStatus = async (mintId: string) => {
     let attempts = 0;
     const maxAttempts = 12;
 
@@ -26,12 +28,40 @@ export const MintForm: FC = () => {
         const statusResponse = await apiService.getMintStatus(mintId);
 
         if (statusResponse.result.status === "SUCCEEDED") {
+          // Store mint data with complete image fields
+          addTransaction({
+            id: mintId,
+            type: "TOKEN_MINT",
+            status: "SUCCEEDED",
+            data: {
+              ...statusResponse.result,
+              metadata: {
+                ...statusResponse.result.metadata,
+                image: statusResponse.result.metadata.image,
+                imagePreview: statusResponse.result.metadata.image,
+                imageThumbnail: statusResponse.result.metadata.image,
+                contract: {
+                  ...statusResponse.result.metadata.contract,
+                  image: statusResponse.result.metadata.image,
+                  imageUrl: statusResponse.result.metadata.image,
+                  image_url: statusResponse.result.metadata.image,
+                },
+              },
+            },
+          });
+
           toast.success("Minting completed successfully!");
           setTimeout(() => {
-            resetProgress(); // Reset and go back to step 1
-          }, 1500); // Small delay to show success message
+            resetProgress();
+          }, 1500);
           return;
         } else if (statusResponse.result.status === "FAILED") {
+          addTransaction({
+            id: mintId,
+            type: "TOKEN_MINT",
+            status: "FAILED",
+            data: statusResponse.result,
+          });
           toast.error("Minting failed");
           return;
         }
@@ -49,7 +79,7 @@ export const MintForm: FC = () => {
     };
 
     checkStatus();
-  }; */
+  };
 
   return (
     <Formik
@@ -63,16 +93,17 @@ export const MintForm: FC = () => {
           const contractAddress = formData.contractDeployment?.address;
           const chain = formData.contractDeployment?.chain;
           const tokenTypeId = formData.tokenType?.tokenTypeId;
+          const image = formData.tokenType?.metadata?.image;
 
           if (!contractAddress || !chain || !tokenTypeId) {
             toast.error("Required data is missing");
             return;
           }
 
-          await apiService.mintTokens({
+          const response = await apiService.mintTokens({
             contractAddress,
             chain,
-            tokenTypeId,
+            tokenTypeId: tokenTypeId,
             destinations: [
               {
                 address: values.address,
@@ -81,7 +112,30 @@ export const MintForm: FC = () => {
             ],
           });
 
-          // Rest of your code...
+          // Add transaction with complete metadata
+          addTransaction({
+            id: response.result.mints[0].id,
+            type: "TOKEN_MINT",
+            status: "PENDING",
+            data: {
+              ...response.result,
+              metadata: {
+                ...response.result.metadata,
+                image: image,
+                imagePreview: image,
+                imageThumbnail: image,
+                contract: {
+                  ...response.result.metadata.contract,
+                  image: image,
+                  imageUrl: image,
+                  image_url: image,
+                },
+              },
+            },
+          });
+
+          pollMintStatus(response.result.mints[0].id);
+          toast.info("Minting initiated. Please wait...");
         } catch (error) {
           console.error("Minting failed:", error);
           toast.error("Failed to mint tokens");
